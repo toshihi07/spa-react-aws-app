@@ -12,7 +12,11 @@ const App = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(apiUrl);
-      setUsers(response.data);
+      if (Array.isArray(response.data)) {
+        setUsers(response.data);
+      } else {
+        console.error("Expected an array of users, but got", response.data);
+      }
     } catch (error) {
       console.error("Error fetching users", error);
     }
@@ -20,11 +24,13 @@ const App = () => {
 
   // ユーザーを追加する関数
   const addUser = async () => {
+    if (!userName) {
+      console.error("User name is required");
+      return;
+    }
     try {
-      const response = await axios.post(apiUrl, {
-        name: userName,
-      });
-      setUserName("");
+      await axios.post(apiUrl, { name: userName });
+      setUserName("");  // 入力欄をリセット
       fetchUsers();  // 新しいユーザーが追加された後にユーザー一覧を再取得
     } catch (error) {
       console.error("Error adding user", error);
@@ -33,12 +39,14 @@ const App = () => {
 
   // ユーザー情報を更新する関数
   const updateUser = async () => {
+    if (!userId || !userName) {
+      console.error("User ID and name are required");
+      return;
+    }
     try {
-      const response = await axios.put(`${apiUrl}/${userId}`, {
-        name: userName,
-      });
-      setUserName("");
-      setUserId("");
+      await axios.put(`${apiUrl}/${userId}`, { name: userName });
+      setUserName("");  // 入力欄をリセット
+      setUserId("");  // 入力欄をリセット
       fetchUsers();  // 更新後にユーザー一覧を再取得
     } catch (error) {
       console.error("Error updating user", error);
@@ -94,12 +102,16 @@ const App = () => {
 
       <h2>Users List</h2>
       <ul>
-        {users.map((user) => (
-          <li key={user.id}>
-            {user.name}
-            <button onClick={() => deleteUser(user.id)}>Delete</button>
-          </li>
-        ))}
+        {Array.isArray(users) && users.length > 0 ? (
+          users.map((user) => (
+            <li key={user.id}>
+              {user.name}
+              <button onClick={() => deleteUser(user.id)}>Delete</button>
+            </li>
+          ))
+        ) : (
+          <li>No users found</li>
+        )}
       </ul>
     </div>
   );
