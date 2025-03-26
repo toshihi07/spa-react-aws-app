@@ -12,10 +12,13 @@ const App = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(apiUrl);
+      // レスポンスが配列か、配列内のユーザーリストかを確認
       if (Array.isArray(response.data)) {
         setUsers(response.data);
+      } else if (response.data.users && Array.isArray(response.data.users)) {
+        setUsers(response.data.users);
       } else {
-        console.error("Expected an array of users, but got", response.data);
+        console.error("Unexpected response format, expected an array of users");
       }
     } catch (error) {
       console.error("Error fetching users", error);
@@ -40,7 +43,7 @@ const App = () => {
   // ユーザー情報を更新する関数
   const updateUser = async () => {
     if (!userId || !userName) {
-      console.error("User ID and name are required");
+      console.error("Both user ID and name are required for updating");
       return;
     }
     try {
