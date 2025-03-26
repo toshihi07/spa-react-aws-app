@@ -1,23 +1,43 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
 
 function App() {
+  const [page, setPage] = useState('home');
+
+  const navigateTo = (newPage) => {
+    setPage(newPage);
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>React SPA Demo</h1>
+        <nav>
+          <button onClick={() => navigateTo('home')}>Home</button>
+          <button onClick={() => navigateTo('about')}>About</button>
+          <button onClick={() => navigateTo('contact')}>Contact</button>
+        </nav>
       </header>
+      <main>
+        {page === 'home' && (
+          <div>
+            <h2>Home Page</h2>
+            <p>Welcome to the home page!</p>
+          </div>
+        )}
+        {page === 'about' && (
+          <div>
+            <h2>About Page</h2>
+            <p>This is a simple React Single Page Application (SPA) demo.</p>
+          </div>
+        )}
+        {page === 'contact' && (
+          <div>
+            <h2>Contact Page</h2>
+            <p>Feel free to reach out to us!</p>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
