@@ -1,45 +1,108 @@
-import React, { useState } from 'react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function App() {
-  const [page, setPage] = useState('home');
+const apiUrl = "https://tn27870bi3.execute-api.ap-northeast-1.amazonaws.com/dev/users";  // API Gateway のエンドポイント
 
-  const navigateTo = (newPage) => {
-    setPage(newPage);
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [userName, setUserName] = useState("");
+  const [userId, setUserId] = useState("");
+
+  // ユーザー一覧を取得する関数
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(apiUrl);
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching users", error);
+    }
   };
+
+  // ユーザーを追加する関数
+  const addUser = async () => {
+    try {
+      const response = await axios.post(apiUrl, {
+        name: userName,
+      });
+      setUserName("");
+      fetchUsers();  // 新しいユーザーが追加された後にユーザー一覧を再取得
+    } catch (error) {
+      console.error("Error adding user", error);
+    }
+  };
+
+  // ユーザー情報を更新する関数
+  const updateUser = async () => {
+    try {
+      const response = await axios.put(`${apiUrl}/${userId}`, {
+        name: userName,
+      });
+      setUserName("");
+      setUserId("");
+      fetchUsers();  // 更新後にユーザー一覧を再取得
+    } catch (error) {
+      console.error("Error updating user", error);
+    }
+  };
+
+  // ユーザーを削除する関数
+  const deleteUser = async (id) => {
+    try {
+      await axios.delete(`${apiUrl}/${id}`);
+      fetchUsers();  // 削除後にユーザー一覧を再取得
+    } catch (error) {
+      console.error("Error deleting user", error);
+    }
+  };
+
+  // 初回レンダリング時にユーザー一覧を取得
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>React SPA Demo</h1>
-        <nav>
-          <button onClick={() => navigateTo('home')}>Home</button>
-          <button onClick={() => navigateTo('about')}>About</button>
-          <button onClick={() => navigateTo('contact')}>Contact</button>
-        </nav>
-      </header>
-      <main>
-        {page === 'home' && (
-          <div>
-            <h2>Home Page</h2>
-            <p>Welcome to the home page!</p>
-          </div>
-        )}
-        {page === 'about' && (
-          <div>
-            <h2>About Page</h2>
-            <p>This is a simple React Single Page Application (SPA) demo.</p>
-          </div>
-        )}
-        {page === 'contact' && (
-          <div>
-            <h2>Contact Page</h2>
-            <p>Feel free to reach out to us!</p>
-          </div>
-        )}
-      </main>
+      <h1>User Management</h1>
+      
+      <div>
+        <h2>Add User</h2>
+        <input
+          type="text"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          placeholder="Enter user name"
+        />
+        <button onClick={addUser}>Add User</button>
+      </div>
+
+      <div>
+        <h2>Update User</h2>
+        <input
+          type="text"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+          placeholder="Enter user ID to update"
+        />
+        <input
+          type="text"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          placeholder="Enter new user name"
+        />
+        <button onClick={updateUser}>Update User</button>
+      </div>
+
+      <h2>Users List</h2>
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>
+            {user.name}
+            <button onClick={() => deleteUser(user.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
-}
+};
 
 export default App;
