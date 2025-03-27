@@ -12,13 +12,12 @@ const App = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(apiUrl);
-      // レスポンスが配列か、配列内のユーザーリストかを確認
+      console.log("Response data:", response.data);  // デバッグ用
+      // データが配列かどうか確認
       if (Array.isArray(response.data)) {
         setUsers(response.data);
-      } else if (response.data.users && Array.isArray(response.data.users)) {
-        setUsers(response.data.users);
       } else {
-        console.error("Unexpected response format, expected an array of users");
+        console.error("Expected an array, but got", response.data);
       }
     } catch (error) {
       console.error("Error fetching users", error);
@@ -43,7 +42,7 @@ const App = () => {
   // ユーザー情報を更新する関数
   const updateUser = async () => {
     if (!userId || !userName) {
-      console.error("Both user ID and name are required for updating");
+      console.error("User ID and name are required");
       return;
     }
     try {
@@ -70,6 +69,9 @@ const App = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  // usersが正しく配列かどうかを確認
+  console.log("Users data:", users);
 
   return (
     <div className="App">
@@ -104,6 +106,7 @@ const App = () => {
       </div>
 
       <h2>Users List</h2>
+      {/* usersが配列の場合にのみ表示 */}
       <ul>
         {Array.isArray(users) && users.length > 0 ? (
           users.map((user) => (
