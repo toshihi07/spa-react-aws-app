@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "react-oidc-context";
 import axios from "axios";
 
@@ -10,26 +10,14 @@ function App() {
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
 
-  useEffect(() => {
-    if (auth.isLoading) return; // 認証の読み込み中は何もしない
-
-    if (!auth.isAuthenticated) {
-      console.log("Not authenticated, redirecting to login...");
-      auth.signinRedirect(); // ログインしていない場合はログイン画面へリダイレクト
-      return;
-    }
-
-    // 認証されていればユーザー情報を取得
-    fetchUsers();
-  }, [auth,fetchUsers ]);  // authが変わったときに再実行
-
-  const fetchUsers = async () => {
+  // fetchUsers を useCallback でメモ化
+  const fetchUsers = useCallback(async () => {
     if (!auth.user?.access_token) {
       console.error("No access token available");
       return;
-    } // 認証トークンがない場合は処理しない
+    }
 
-      console.log("Access Token:", auth.user.access_token); // トークンをログ出力
+    console.log("Access Token:", auth.user.access_token);
 
     try {
       const response = await axios.get(apiUrl, {
@@ -46,7 +34,20 @@ function App() {
     } catch (error) {
       console.error("Error fetching users", error);
     }
-  };
+  }, [auth.user]); // auth.user に依存
+
+  useEffect(() => {
+    if (auth.isLoading) return; // 認証の読み込み中は何もしない
+
+    if (!auth.isAuthenticated) {
+      console.log("Not authenticated, redirecting to login...");
+      auth.signinRedirect(); // ログインしていない場合はログイン画面へリダイレクト
+      return;
+    }
+
+    // 認証されていればユーザー情報を取得
+    fetchUsers();
+  }, [auth, fetchUsers]);  // auth が変わったときに再実行
 
   const addUser = async () => {
     if (!userName) {
