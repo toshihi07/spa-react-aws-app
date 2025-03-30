@@ -21,7 +21,7 @@ function App() {
 
     // 認証されていればユーザー情報を取得
     fetchUsers();
-  }, [auth]);  // authが変わったときに再実行
+  }, [auth,fetchUsers ]);  // authが変わったときに再実行
 
   const fetchUsers = async () => {
     if (!auth.user?.access_token) {
@@ -29,7 +29,7 @@ function App() {
       return;
     } // 認証トークンがない場合は処理しない
 
-    console.log("Access Token:", auth.user.access_token); // トークンをログ出力
+      console.log("Access Token:", auth.user.access_token); // トークンをログ出力
 
     try {
       const response = await axios.get(apiUrl, {
